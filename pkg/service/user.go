@@ -37,7 +37,7 @@ func (s *UserService) CreateUser(ctx context.Context, input dto.CreateUserInput)
 		Role:         input.Role,
 	}
 
-	userID, err := s.repo.CreateUser(user)
+	userID, err := s.repo.CreateUser(ctx, user)
 	if err != nil {
 		return 0, err
 	}
@@ -70,7 +70,7 @@ func (s *UserService) GetAllUsers(ctx context.Context) ([]todo.User, error) {
 	}
 
 	//db
-	users, err := s.repo.GetAllUsers()
+	users, err := s.repo.GetAllUsers(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +93,7 @@ func (s *UserService) GetUserByID(ctx context.Context, userID uint) (todo.User, 
 	}
 
 	//db
-	user, err := s.repo.GetUserByID(userID)
+	user, err := s.repo.GetUserByID(ctx, userID)
 	if err != nil {
 		return todo.User{}, err
 	}
@@ -113,7 +113,7 @@ func (s *UserService) GetUserByEmail(ctx context.Context, email string) (todo.Us
 		return user, nil
 	}
 	//db
-	user, err := s.repo.GetUserByEmail(email)
+	user, err := s.repo.GetUserByEmail(ctx, email)
 	if err != nil {
 		return todo.User{}, err
 	}
@@ -126,7 +126,7 @@ func (s *UserService) GetUserByEmail(ctx context.Context, email string) (todo.Us
 
 func (s *UserService) UpdateUser(ctx context.Context, userID uint, input todo.UpdateUserInput) (todo.UpdateUserInput, error) {
 
-	result, err := s.repo.UpdateUser(userID, input)
+	result, err := s.repo.UpdateUser(ctx, userID, input)
 	if err != nil {
 		return result, err
 	}
@@ -142,7 +142,7 @@ func (s *UserService) UpdateUser(ctx context.Context, userID uint, input todo.Up
 
 func (s *UserService) DeleteUser(ctx context.Context, id int) error {
 
-	err := s.repo.DeleteUser(id)
+	err := s.repo.DeleteUser(ctx, id)
 	if err != nil {
 		return err
 	}

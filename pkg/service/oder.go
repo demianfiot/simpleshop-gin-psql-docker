@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"prac/pkg/repository"
 	"prac/todo"
 )
@@ -12,8 +13,7 @@ type OrderService struct {
 func NewOrderService(repo repository.Order) *OrderService {
 	return &OrderService{repo: repo}
 }
-func (s *OrderService) CreateOrder(userID uint, items []todo.OrderItem) (int, error) {
-	// Розрахунок загальної суми
+func (s *OrderService) CreateOrder(ctx context.Context, userID uint, items []todo.OrderItem) (int, error) {
 	var total float64
 	for _, item := range items {
 		total += item.Price * float64(item.Quantity)
@@ -25,21 +25,21 @@ func (s *OrderService) CreateOrder(userID uint, items []todo.OrderItem) (int, er
 		Total:  total,
 	}
 
-	return s.repo.CreateOrder(order, items)
+	return s.repo.CreateOrder(ctx, order, items)
 }
 
-func (s *OrderService) GetUserOrders(userID uint) ([]todo.Order, error) {
-	return s.repo.GetUserOrders(userID)
+func (s *OrderService) GetUserOrders(ctx context.Context, userID uint) ([]todo.Order, error) {
+	return s.repo.GetUserOrders(ctx, userID)
 }
 
-func (s *OrderService) GetAllOrders() ([]todo.Order, error) {
-	return s.repo.GetAllOrders()
+func (s *OrderService) GetAllOrders(ctx context.Context) ([]todo.Order, error) {
+	return s.repo.GetAllOrders(ctx)
 }
 
-func (s *OrderService) GetOrderByID(orderID uint) (todo.Order, error) {
-	return s.repo.GetOrderByID(orderID)
+func (s *OrderService) GetOrderByID(ctx context.Context, orderID uint) (todo.Order, error) {
+	return s.repo.GetOrderByID(ctx, orderID)
 }
 
-func (s *OrderService) UpdateOrderStatus(orderID uint, status string) error {
-	return s.repo.UpdateOrderStatus(orderID, status)
+func (s *OrderService) UpdateOrderStatus(ctx context.Context, orderID uint, status string) error {
+	return s.repo.UpdateOrderStatus(ctx, orderID, status)
 }

@@ -13,8 +13,8 @@ func (h *Handler) SignUp(c *gin.Context) {
 		NewErrorResponse(c, 400, err.Error())
 		return
 	}
-
-	id, err := h.services.Autorization.CreateUser(input)
+	ctx := c.Request.Context()
+	id, err := h.services.Authorization.CreateUser(ctx, input)
 	if err != nil {
 		NewErrorResponse(c, 500, err.Error())
 		return
@@ -37,8 +37,8 @@ func (h *Handler) SignIn(c *gin.Context) {
 		NewErrorResponse(c, 400, err.Error())
 		return
 	}
-
-	token, err := h.services.Autorization.GenerateToken(input.Email, input.Password)
+	ctx := c.Request.Context()
+	token, err := h.services.Authorization.GenerateToken(ctx, input.Email, input.Password)
 	if err != nil {
 		NewErrorResponse(c, 500, err.Error())
 		return

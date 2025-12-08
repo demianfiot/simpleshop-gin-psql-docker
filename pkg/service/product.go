@@ -1,19 +1,40 @@
 package service
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
 	"prac/pkg/repository"
 	"prac/todo"
+	"time"
 )
 
 type ProductService struct {
-	repo repository.Product
+	repo         repository.Product
+	cacheRepo    repository.CacheRepository
+	cacheTTL     time.Duration
+	listCacheTTL time.Duration
 }
 
-func NewProductService(repo repository.Product) *ProductService {
-	return &ProductService{repo: repo}
+func NewProductService(repo repository.Product, cacheRepo repository.CacheRepository) *ProductService {
+	return &ProductService{
+		repo:         repo,
+		cacheRepo:    cacheRepo,
+		cacheTTL:     10 * time.Minute, // TTL user
+		listCacheTTL: 2 * time.Minute,  // TTL list
+	}
 }
 
-func (s *ProductService) CreateProduct(input todo.CreateProductInput, sellerID uint) (int, error) {
+// cache keys
+func (s *ProductService) productCacheKey(id uint) string {
+	return fmt.Sprintf("product:%d", id)
+}
+
+func (s *ProductService) productsListCacheKey() string {
+	return "products:list"
+}
+
+func (s *ProductService) CreateProduct(ctx context.Context, input todo.CreateProductInput, sellerID uint) (int, error) {
 	product := todo.Product{
 		Name:        input.Name,
 		Description: input.Description,
@@ -23,17 +44,34 @@ func (s *ProductService) CreateProduct(input todo.CreateProductInput, sellerID u
 		SellerID:    sellerID,
 	}
 
-	return s.repo.CreateProduct(product)
+	return s.repo.CreateProduct(ctx, product)
 }
 
-func (s *ProductService) GetAllProducts() ([]todo.Product, error) {
-	return s.repo.GetAllProducts()
+func (s *ProductService) GetAllProducts(ctx context.Context) ([]todo.Product, error) {
+	return s.repo.GetAllProducts(ctx)
 }
 
-func (s *ProductService) GetProductByID(userID uint) (todo.Product, error) {
-	return s.repo.GetProductByID(userID)
+func (s *ProductService) GetProductByID(ctx context.Context, productID uint) (todo.Product, error) {
+	cacheKey := s.productCacheKey(productID)
+	// cache
+	cachedData, err := s.cacheRepo.Get(ctx, cacheKey)
+	if err == nil && cachedData != nil {
+		var product todo.Product
+		json.Unmarshal(cachedData, &product)
+		return product, nil
+	}
+
+	product, err := s.repo.GetProductByID(ctx, productID)
+	if err != nil {
+		return todo.Product{}, err
+	}
+
+	s.cacheRepo.Set(ctx, cacheKey, product, 10*time.Minute)
+
+	return product, nil
+
 }
-func (s *ProductService) UpdateProduct(productID uint, input todo.UpdateProductInput, currentUserID uint) (todo.Product, error) {
+func (s *ProductService) UpdateProduct(ctx context.Context, productID uint, input todo.UpdateProductInput, currentUserID uint) (todo.Product, error) {
 	product := todo.Product{
 		Name:        input.Name,
 		Description: input.Description,
@@ -42,8 +80,8 @@ func (s *ProductService) UpdateProduct(productID uint, input todo.UpdateProductI
 		Category:    input.Category,
 	}
 
-	return s.repo.UpdateProduct(productID, product, currentUserID)
+	return s.repo.UpdateProduct(ctx, productID, product, currentUserID)
 }
-func (s *ProductService) DeleteProduct(id int) error {
-	return s.repo.DeleteProduct(id)
+func (s *ProductService) DeleteProduct(ctx context.Context, id int) error {
+	return s.repo.DeleteProduct(ctx, id)
 }

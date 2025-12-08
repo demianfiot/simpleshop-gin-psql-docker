@@ -24,8 +24,8 @@ func (h *Handler) CreateProduct(c *gin.Context) {
 		NewErrorResponse(c, http.StatusUnauthorized, err.Error())
 		return
 	}
-
-	id, err := h.services.Product.CreateProduct(input, sellerID)
+	ctx := c.Request.Context()
+	id, err := h.services.Product.CreateProduct(ctx, input, sellerID)
 	if err != nil {
 		NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -37,7 +37,8 @@ func (h *Handler) CreateProduct(c *gin.Context) {
 }
 
 func (h *Handler) GetAllProducts(c *gin.Context) {
-	products, err := h.services.Product.GetAllProducts()
+	ctx := c.Request.Context()
+	products, err := h.services.Product.GetAllProducts(ctx)
 	if err != nil {
 		NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -54,8 +55,8 @@ func (h *Handler) GetProductByID(c *gin.Context) {
 		NewErrorResponse(c, http.StatusBadRequest, "invalid product id param")
 		return
 	}
-
-	product, err := h.services.Product.GetProductByID(uint(id))
+	ctx := c.Request.Context()
+	product, err := h.services.Product.GetProductByID(ctx, uint(id))
 	if err != nil {
 		NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -84,8 +85,8 @@ func (h *Handler) UpdateProduct(c *gin.Context) {
 		NewErrorResponse(c, http.StatusUnauthorized, err.Error())
 		return
 	}
-
-	updatedProduct, err := h.services.Product.UpdateProduct(uint(productID), input, currentUserID)
+	ctx := c.Request.Context()
+	updatedProduct, err := h.services.Product.UpdateProduct(ctx, uint(productID), input, currentUserID)
 	if err != nil {
 		if err == repository.ErrProductNotFound {
 			NewErrorResponse(c, http.StatusNotFound, "product not found")
@@ -110,7 +111,8 @@ func (h *Handler) DeleteProduct(c *gin.Context) {
 		NewErrorResponse(c, http.StatusBadRequest, "invalid user id param")
 		return
 	}
-	err = h.services.Product.DeleteProduct(id)
+	ctx := c.Request.Context()
+	err = h.services.Product.DeleteProduct(ctx, id)
 	if err != nil {
 		NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

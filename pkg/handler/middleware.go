@@ -28,8 +28,8 @@ func (h *Handler) userIdentity(c *gin.Context) {
 		NewErrorResponse(c, 401, "invalid auth header")
 		return
 	}
-
-	userId, userrole, err := h.services.Autorization.ParseToken(headerParts[1])
+	ctx := c.Request.Context()
+	userId, userrole, err := h.services.Autorization.ParseToken(ctx, headerParts[1])
 	if err != nil {
 		NewErrorResponse(c, 401, err.Error())
 		return

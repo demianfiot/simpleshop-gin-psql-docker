@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"prac/todo"
@@ -16,7 +17,7 @@ func NewAuthPostgres(db *sqlx.DB) *AuthPostgres {
 	return &AuthPostgres{db: db}
 }
 
-func (r *AuthPostgres) CreateUser(user todo.User) (int, error) {
+func (r *AuthPostgres) CreateUser(ctx context.Context, user todo.User) (int, error) {
 	query := `
 	INSERT INTO users (name, email, password_hash, role)
 	VALUES ($1, $2, $3, $4)
@@ -37,7 +38,7 @@ func (r *AuthPostgres) CreateUser(user todo.User) (int, error) {
 	}
 	return int(user.ID), nil
 }
-func (r *AuthPostgres) GetUser(email, password string) (todo.User, error) {
+func (r *AuthPostgres) GetUser(ctx context.Context, email, password string) (todo.User, error) {
 	var user todo.User
 	query :=
 		`SELECT id, name, role, created_at
@@ -48,7 +49,7 @@ func (r *AuthPostgres) GetUser(email, password string) (todo.User, error) {
 
 	return user, err
 }
-func (r *AuthPostgres) GetUserByID(userID uint) (todo.User, error) {
+func (r *AuthPostgres) GetUserByID(ctx context.Context, userID uint) (todo.User, error) {
 	var user todo.User
 	query := `
 		SELECT id, name, email, password_hash, role, created_at 

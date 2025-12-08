@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"prac/todo"
@@ -16,7 +17,7 @@ func NewProductPostgres(db *sqlx.DB) *ProductPostgres {
 	return &ProductPostgres{db: db}
 }
 
-func (r *ProductPostgres) CreateProduct(product todo.Product) (int, error) {
+func (r *ProductPostgres) CreateProduct(ctx context.Context, product todo.Product) (int, error) {
 	query := `
 	INSERT INTO products (name, description, price, stock, category, seller_id)
 	VALUES ($1, $2, $3, $4, $5, $6)
@@ -39,13 +40,13 @@ func (r *ProductPostgres) CreateProduct(product todo.Product) (int, error) {
 	}
 	return int(product.ID), nil
 }
-func (r *ProductPostgres) GetAllProducts() ([]todo.Product, error) {
+func (r *ProductPostgres) GetAllProducts(ctx context.Context) ([]todo.Product, error) {
 	var products []todo.Product
 	query := `SELECT id, name, description, price, stock, category, seller_id FROM products ORDER BY id`
 	err := r.db.Select(&products, query)
 	return products, err
 }
-func (r *ProductPostgres) GetProductByID(productID uint) (todo.Product, error) {
+func (r *ProductPostgres) GetProductByID(ctx context.Context, productID uint) (todo.Product, error) {
 	var product todo.Product
 	query :=
 		`
@@ -56,7 +57,7 @@ func (r *ProductPostgres) GetProductByID(productID uint) (todo.Product, error) {
 	err := r.db.Get(&product, query, productID)
 	return product, err
 }
-func (r *ProductPostgres) UpdateProduct(productID uint, product todo.Product, currentUserID uint) (todo.Product, error) {
+func (r *ProductPostgres) UpdateProduct(ctx context.Context, productID uint, product todo.Product, currentUserID uint) (todo.Product, error) {
 	query := `
         UPDATE products
         SET name = $1, description = $2, price = $3, stock = $4, category = $5
@@ -94,7 +95,7 @@ func (r *ProductPostgres) UpdateProduct(productID uint, product todo.Product, cu
 
 	return updatedProduct, nil
 }
-func (r *ProductPostgres) DeleteProduct(id int) error {
+func (r *ProductPostgres) DeleteProduct(ctx context.Context, id int) error {
 	query := `DELETE FROM products WHERE id = $1`
 	result, err := r.db.Exec(query, id)
 	if err != nil {

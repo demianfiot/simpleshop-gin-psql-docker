@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"crypto/sha1"
 	"errors"
 	"fmt"
@@ -22,19 +23,19 @@ type tockenClaims struct {
 	UserID uint `json:"user_id"`
 }
 type AuthService struct {
-	repo repository.Autorization
+	repo repository.Authorization
 }
 
-func NewAuthService(repo repository.Autorization) *AuthService {
+func NewAuthService(repo repository.Authorization) *AuthService {
 	return &AuthService{repo: repo}
 }
 
-func (s *AuthService) CreateUser(user todo.User) (int, error) {
+func (s *AuthService) CreateUser(ctx context.Context, user todo.User) (int, error) {
 	user.PasswordHash = s.generatePasswordHash(user.PasswordHash)
-	return s.repo.CreateUser(user)
+	return s.repo.CreateUser(ctx, user)
 }
-func (s *AuthService) GenerateToken(email, password string) (string, error) { // TEST потім некст
-	user, err := s.repo.GetUser(email, s.generatePasswordHash(password))
+func (s *AuthService) GenerateToken(ctx context.Context, email, password string) (string, error) {
+	user, err := s.repo.GetUser(ctx, email, s.generatePasswordHash(password))
 	if err != nil {
 		return "", err
 	}
@@ -46,7 +47,7 @@ func (s *AuthService) GenerateToken(email, password string) (string, error) { //
 	})
 	return tocken.SignedString([]byte(signKey))
 }
-func (s *AuthService) ParseToken(acessToken string) (uint, string, error) {
+func (s *AuthService) ParseToken(ctx context.Context, acessToken string) (uint, string, error) {
 	token, err := jwt.ParseWithClaims(acessToken, &tockenClaims{}, func(tkn *jwt.Token) (interface{}, error) {
 		if _, ok := tkn.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("invalid signing method")
@@ -60,7 +61,7 @@ func (s *AuthService) ParseToken(acessToken string) (uint, string, error) {
 	if !ok {
 		return 0, "", errors.New("token claims are not of type *tockenClaims")
 	}
-	user, err := s.repo.GetUserByID(claims.UserID)
+	user, err := s.repo.GetUserByID(ctx, claims.UserID)
 	if err != nil {
 		return 0, "", fmt.Errorf("failed to get user: %w", err)
 	}
@@ -73,6 +74,6 @@ func (s *AuthService) generatePasswordHash(password string) string {
 
 	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
 }
-func (s *AuthService) GetUserByID(userID uint) (todo.User, error) {
-	return s.repo.GetUserByID(userID)
+func (s *AuthService) GetUserByID(ctx context.Context, userID uint) (todo.User, error) {
+	return s.repo.GetUserByID(ctx, userID)
 }

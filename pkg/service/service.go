@@ -8,10 +8,10 @@ import (
 )
 
 type Autorization interface {
-	CreateUser(user todo.User) (int, error)
-	GenerateToken(email, password string) (string, error)
-	ParseToken(token string) (uint, string, error)
-	GetUserByID(userID uint) (todo.User, error)
+	CreateUser(ctx context.Context, user todo.User) (int, error)
+	GenerateToken(ctx context.Context, email, password string) (string, error)
+	ParseToken(ctx context.Context, token string) (uint, string, error)
+	GetUserByID(ctx context.Context, userID uint) (todo.User, error)
 }
 type User interface {
 	CreateUser(ctx context.Context, user dto.CreateUserInput) (int, error)
@@ -23,18 +23,18 @@ type User interface {
 }
 
 type Product interface {
-	CreateProduct(input todo.CreateProductInput, sellerID uint) (int, error)
-	GetAllProducts() ([]todo.Product, error)
-	GetProductByID(productID uint) (todo.Product, error)
-	UpdateProduct(productID uint, input todo.UpdateProductInput, currentUserID uint) (todo.Product, error)
-	DeleteProduct(id int) error
+	CreateProduct(ctx context.Context, input todo.CreateProductInput, sellerID uint) (int, error)
+	GetAllProducts(ctx context.Context) ([]todo.Product, error)
+	GetProductByID(ctx context.Context, productID uint) (todo.Product, error)
+	UpdateProduct(ctx context.Context, productID uint, input todo.UpdateProductInput, currentUserID uint) (todo.Product, error)
+	DeleteProduct(ctx context.Context, id int) error
 }
 type Order interface {
-	CreateOrder(userID uint, items []todo.OrderItem) (int, error)
-	GetUserOrders(userID uint) ([]todo.Order, error)
-	GetOrderByID(orderID uint) (todo.Order, error)
-	UpdateOrderStatus(orderID uint, status string) error
-	GetAllOrders() ([]todo.Order, error)
+	CreateOrder(ctx context.Context, userID uint, items []todo.OrderItem) (int, error)
+	GetUserOrders(ctx context.Context, userID uint) ([]todo.Order, error)
+	GetOrderByID(ctx context.Context, orderID uint) (todo.Order, error)
+	UpdateOrderStatus(ctx context.Context, orderID uint, status string) error
+	GetAllOrders(ctx context.Context) ([]todo.Order, error)
 }
 
 type Service struct {
@@ -48,7 +48,7 @@ func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		Autorization: NewAuthService(repos.Autorization),
 		User:         NewUserService(repos.User, repos.CacheRepository),
-		Product:      NewProductService(repos.Product),
+		Product:      NewProductService(repos.Product, repos.CacheRepository),
 		Order:        NewOrderService(repos.Order),
 	}
 }

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"prac/todo"
@@ -16,7 +17,7 @@ func NewOrderPostgres(db *sqlx.DB) *OrderPostgres {
 	return &OrderPostgres{db: db}
 }
 
-func (r *OrderPostgres) CreateOrder(order todo.Order, items []todo.OrderItem) (int, error) {
+func (r *OrderPostgres) CreateOrder(ctx context.Context, order todo.Order, items []todo.OrderItem) (int, error) {
 	tx, err := r.db.Beginx()
 	if err != nil {
 		return 0, fmt.Errorf("failed to begin transaction: %w", err)
@@ -76,7 +77,7 @@ func (r *OrderPostgres) CreateOrder(order todo.Order, items []todo.OrderItem) (i
 	return orderID, nil
 }
 
-func (r *OrderPostgres) GetUserOrders(userID uint) ([]todo.Order, error) {
+func (r *OrderPostgres) GetUserOrders(ctx context.Context, userID uint) ([]todo.Order, error) {
 	var orders []todo.Order
 	query := `
 		SELECT id, user_id, status, total, created_at 
@@ -88,7 +89,7 @@ func (r *OrderPostgres) GetUserOrders(userID uint) ([]todo.Order, error) {
 	return orders, err
 }
 
-func (r *OrderPostgres) GetOrderByID(orderID uint) (todo.Order, error) {
+func (r *OrderPostgres) GetOrderByID(ctx context.Context, orderID uint) (todo.Order, error) {
 	var order todo.Order
 
 	query := `
@@ -120,7 +121,7 @@ func (r *OrderPostgres) GetOrderByID(orderID uint) (todo.Order, error) {
 	return order, nil
 }
 
-func (r *OrderPostgres) UpdateOrderStatus(orderID uint, status string) error {
+func (r *OrderPostgres) UpdateOrderStatus(ctx context.Context, orderID uint, status string) error {
 	query := `
 		UPDATE orders
 		SET status = $1
@@ -142,7 +143,7 @@ func (r *OrderPostgres) UpdateOrderStatus(orderID uint, status string) error {
 	return nil
 }
 
-func (r *OrderPostgres) GetAllOrders() ([]todo.Order, error) {
+func (r *OrderPostgres) GetAllOrders(ctx context.Context) ([]todo.Order, error) {
 	var orders []todo.Order
 	query := `
         SELECT o.id, o.user_id, o.status, o.total, o.created_at, u.name as user_name

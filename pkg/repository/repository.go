@@ -16,39 +16,38 @@ type CacheRepository interface {
 	DeleteByPattern(ctx context.Context, pattern string) error
 }
 
-type Autorization interface {
-	CreateUser(user todo.User) (int, error)
-	GetUser(email, password string) (todo.User, error)
-	GetUserByID(userID uint) (todo.User, error)
+type Authorization interface {
+	CreateUser(ctx context.Context, user todo.User) (int, error)
+	GetUser(ctx context.Context, email, password string) (todo.User, error)
+	GetUserByID(ctx context.Context, userID uint) (todo.User, error)
 }
-
 type User interface {
-	CreateUser(user todo.User) (int, error)
-	GetAllUsers() ([]todo.User, error)
-	GetUserByID(id uint) (todo.User, error)
-	GetUserByEmail(email string) (todo.User, error)
-	UpdateUser(userid uint, user todo.UpdateUserInput) (todo.UpdateUserInput, error)
-	DeleteUser(id int) error
+	CreateUser(ctx context.Context, user todo.User) (int, error)
+	GetAllUsers(ctx context.Context) ([]todo.User, error)
+	GetUserByID(ctx context.Context, id uint) (todo.User, error)
+	GetUserByEmail(ctx context.Context, email string) (todo.User, error)
+	UpdateUser(ctx context.Context, userid uint, user todo.UpdateUserInput) (todo.UpdateUserInput, error)
+	DeleteUser(ctx context.Context, id int) error
 }
 
 type Product interface {
-	CreateProduct(product todo.Product) (int, error)
-	GetAllProducts() ([]todo.Product, error)
-	GetProductByID(productID uint) (todo.Product, error)
-	UpdateProduct(productID uint, product todo.Product, currentUserID uint) (todo.Product, error)
-	DeleteProduct(id int) error
+	CreateProduct(ctx context.Context, product todo.Product) (int, error)
+	GetAllProducts(ctx context.Context) ([]todo.Product, error)
+	GetProductByID(ctx context.Context, productID uint) (todo.Product, error)
+	UpdateProduct(ctx context.Context, productID uint, product todo.Product, currentUserID uint) (todo.Product, error)
+	DeleteProduct(ctx context.Context, id int) error
 }
 type Order interface {
-	CreateOrder(order todo.Order, items []todo.OrderItem) (int, error)
-	GetUserOrders(userID uint) ([]todo.Order, error)
-	GetOrderByID(orderID uint) (todo.Order, error)
-	UpdateOrderStatus(orderID uint, status string) error
-	GetAllOrders() ([]todo.Order, error)
+	CreateOrder(ctx context.Context, order todo.Order, items []todo.OrderItem) (int, error)
+	GetUserOrders(ctx context.Context, userID uint) ([]todo.Order, error)
+	GetOrderByID(ctx context.Context, orderID uint) (todo.Order, error)
+	UpdateOrderStatus(ctx context.Context, orderID uint, status string) error
+	GetAllOrders(ctx context.Context) ([]todo.Order, error)
 }
 
 type Repository struct {
 	CacheRepository
-	Autorization
+	Authorization
 	User
 	Product
 	Order
@@ -57,7 +56,7 @@ type Repository struct {
 func NewRepository(db *sqlx.DB, redisClient *redis.Client) *Repository {
 	return &Repository{
 		CacheRepository: NewCacheRepository(redisClient),
-		Autorization:    NewAuthPostgres(db),
+		Authorization:   NewAuthPostgres(db),
 		User:            NewUserPostgres(db),
 		Product:         NewProductPostgres(db),
 		Order:           NewOrderPostgres(db),

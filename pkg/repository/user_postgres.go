@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 	"prac/todo"
 
@@ -14,7 +15,7 @@ type UserPostgres struct {
 func NewUserPostgres(db *sqlx.DB) *UserPostgres {
 	return &UserPostgres{db: db}
 }
-func (r *UserPostgres) CreateUser(user todo.User) (int, error) {
+func (r *UserPostgres) CreateUser(ctx context.Context, user todo.User) (int, error) {
 	query := `
 	INSERT INTO users (name, email, password_hash, role)
 	VALUES ($1, $2, $3, $4)
@@ -35,14 +36,14 @@ func (r *UserPostgres) CreateUser(user todo.User) (int, error) {
 	}
 	return int(user.ID), nil
 }
-func (r *UserPostgres) GetAllUsers() ([]todo.User, error) {
+func (r *UserPostgres) GetAllUsers(ctx context.Context) ([]todo.User, error) {
 	var users []todo.User
 	query := `SELECT id, name, email, created_at, role FROM users ORDER BY id`
 	err := r.db.Select(&users, query)
 	return users, err
 }
 
-func (r *UserPostgres) GetUserByID(id uint) (todo.User, error) {
+func (r *UserPostgres) GetUserByID(ctx context.Context, id uint) (todo.User, error) {
 	var user todo.User
 	query :=
 		`
@@ -53,7 +54,7 @@ func (r *UserPostgres) GetUserByID(id uint) (todo.User, error) {
 	err := r.db.Get(&user, query, id)
 	return user, err
 }
-func (r *UserPostgres) GetUserByEmail(email string) (todo.User, error) {
+func (r *UserPostgres) GetUserByEmail(ctx context.Context, email string) (todo.User, error) {
 	var user todo.User
 	query :=
 		`
@@ -64,7 +65,7 @@ func (r *UserPostgres) GetUserByEmail(email string) (todo.User, error) {
 	err := r.db.Get(&user, query, email)
 	return user, err
 }
-func (r *UserPostgres) UpdateUser(userid uint, user todo.UpdateUserInput) (todo.UpdateUserInput, error) {
+func (r *UserPostgres) UpdateUser(ctx context.Context, userid uint, user todo.UpdateUserInput) (todo.UpdateUserInput, error) {
 	query := `
 		UPDATE users
 		SET name = $1, email = $2, role = $3
@@ -84,7 +85,7 @@ func (r *UserPostgres) UpdateUser(userid uint, user todo.UpdateUserInput) (todo.
 	}
 	return user, err
 }
-func (r *UserPostgres) DeleteUser(id int) error {
+func (r *UserPostgres) DeleteUser(ctx context.Context, id int) error {
 	query := `DELETE FROM users WHERE id = $1`
 	result, err := r.db.Exec(query, id)
 	if err != nil {

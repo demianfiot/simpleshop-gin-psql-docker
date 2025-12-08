@@ -38,8 +38,8 @@ func (h *Handler) CreateOrder(c *gin.Context) {
 			Price:     item.Price,
 		})
 	}
-
-	orderID, err := h.services.Order.CreateOrder(userID, orderItems)
+	ctx := c.Request.Context()
+	orderID, err := h.services.Order.CreateOrder(ctx, userID, orderItems)
 	if err != nil {
 		NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -57,7 +57,8 @@ func (h *Handler) GetUserOrders(c *gin.Context) {
 		NewErrorResponse(c, http.StatusUnauthorized, err.Error())
 		return
 	}
-	orders, err := h.services.Order.GetUserOrders(userID)
+	ctx := c.Request.Context()
+	orders, err := h.services.Order.GetUserOrders(ctx, userID)
 	if err != nil {
 		NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -71,7 +72,8 @@ func (h *Handler) GetUserOrders(c *gin.Context) {
 
 func (h *Handler) GetAllOrders(c *gin.Context) {
 	// tilky admin - middleware
-	orders, err := h.services.Order.GetAllOrders()
+	ctx := c.Request.Context()
+	orders, err := h.services.Order.GetAllOrders(ctx)
 	if err != nil {
 		NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -89,8 +91,8 @@ func (h *Handler) GetOrderByID(c *gin.Context) {
 		NewErrorResponse(c, http.StatusBadRequest, "invalid order id param")
 		return
 	}
-
-	order, err := h.services.Order.GetOrderByID(uint(orderID))
+	ctx := c.Request.Context()
+	order, err := h.services.Order.GetOrderByID(ctx, uint(orderID))
 	if err != nil {
 		if err.Error() == "order not found" {
 			NewErrorResponse(c, http.StatusNotFound, "order not found")
@@ -130,8 +132,8 @@ func (h *Handler) UpdateOrderStatus(c *gin.Context) {
 		NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-
-	err = h.services.Order.UpdateOrderStatus(uint(orderID), input.Status)
+	ctx := c.Request.Context()
+	err = h.services.Order.UpdateOrderStatus(ctx, uint(orderID), input.Status)
 	if err != nil {
 		if err.Error() == "order not found" {
 			NewErrorResponse(c, http.StatusNotFound, "order not found")
