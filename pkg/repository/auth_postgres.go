@@ -19,9 +19,9 @@ func NewAuthPostgres(db *sqlx.DB) *AuthPostgres {
 
 func (r *AuthPostgres) CreateUser(ctx context.Context, user todo.User) (int, error) {
 	query := `
-	INSERT INTO users (name, email, password_hash, role)
-	VALUES ($1, $2, $3, $4)
-	RETURNING id, created_at
+		INSERT INTO users (name, email, password_hash, role)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id, created_at
 	`
 	err := r.db.QueryRow(
 		query,
@@ -40,10 +40,11 @@ func (r *AuthPostgres) CreateUser(ctx context.Context, user todo.User) (int, err
 }
 func (r *AuthPostgres) GetUser(ctx context.Context, email, password string) (todo.User, error) {
 	var user todo.User
-	query :=
-		`SELECT id, name, role, created_at
-	FROM users
-	WHERE email = $1 AND password_hash = $2`
+	query := `
+		SELECT id, name, role, created_at
+		FROM users
+		WHERE email = $1 AND password_hash = $2
+	`
 
 	err := r.db.Get(&user, query, email, password)
 

@@ -31,14 +31,14 @@ services:
 
   postgres:
     image: postgres:15-alpine
-    container_name: crm-postgres
+    container_name: postgres #crm-postgres
     environment:
       POSTGRES_USER: ${DB_USER:-crm_user}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-crm_password}
       POSTGRES_DB: ${DB_NAME:-crm_db}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      # - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "${DB_PORT:-5432}:5432"
     healthcheck:
@@ -54,7 +54,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: crm-redis
+    container_name: redis #crm-redis
     command: redis-server --appendonly yes
     volumes:
       - redis_data:/data

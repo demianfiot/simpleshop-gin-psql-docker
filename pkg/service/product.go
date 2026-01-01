@@ -71,16 +71,17 @@ func (s *ProductService) GetProductByID(ctx context.Context, productID uint) (to
 	return product, nil
 
 }
-func (s *ProductService) UpdateProduct(ctx context.Context, productID uint, input todo.UpdateProductInput, currentUserID uint) (todo.Product, error) {
+func (s *ProductService) UpdateProduct(ctx context.Context, productID uint, input todo.UpdateProductInput, sellerID uint) (todo.Product, error) {
 	product := todo.Product{
 		Name:        input.Name,
 		Description: input.Description,
 		Price:       input.Price,
 		Stock:       input.Stock,
 		Category:    input.Category,
+		SellerID:    sellerID,
 	}
 
-	return s.repo.UpdateProduct(ctx, productID, product, currentUserID)
+	return s.repo.UpdateProduct(ctx, productID, product)
 }
 func (s *ProductService) DeleteProduct(ctx context.Context, id int) error {
 	return s.repo.DeleteProduct(ctx, id)

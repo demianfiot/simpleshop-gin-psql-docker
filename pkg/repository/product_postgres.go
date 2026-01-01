@@ -57,7 +57,7 @@ func (r *ProductPostgres) GetProductByID(ctx context.Context, productID uint) (t
 	err := r.db.Get(&product, query, productID)
 	return product, err
 }
-func (r *ProductPostgres) UpdateProduct(ctx context.Context, productID uint, product todo.Product, currentUserID uint) (todo.Product, error) {
+func (r *ProductPostgres) UpdateProduct(ctx context.Context, productID uint, product todo.Product) (todo.Product, error) {
 	query := `
         UPDATE products
         SET name = $1, description = $2, price = $3, stock = $4, category = $5
@@ -74,7 +74,7 @@ func (r *ProductPostgres) UpdateProduct(ctx context.Context, productID uint, pro
 		product.Stock,
 		product.Category,
 		productID,
-		currentUserID, // check seller / admin
+		product.SellerID, // check seller / admin
 	).Scan(
 		&updatedProduct.ID,
 		&updatedProduct.Name,

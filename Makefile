@@ -1,4 +1,3 @@
-
 .PHONY: migrate-up migrate-down migrate-create db-shell
 
 
