@@ -11,6 +11,7 @@ import (
 const (
 	authorizationHeader = "Authorization"
 	userCtx             = "userId"
+	userRole            = "userRole"
 )
 
 func (h *Handler) userIdentity(c *gin.Context) {
@@ -36,14 +37,14 @@ func (h *Handler) userIdentity(c *gin.Context) {
 	}
 	fmt.Printf("DEBUG: UserID: %d, Role: %s\n", userId, userrole)
 	c.Set(userCtx, userId)
-	c.Set("userRole", userrole)
+	c.Set(userRole, userrole)
 	c.Next()
 }
 
 func (h *Handler) requireRole(allowedRoles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		fmt.Printf("DEBUG: Checking role for path: %s\n", c.Request.URL.Path)
-		userRole, exists := c.Get("userRole")
+		userRole, exists := c.Get(userRole)
 		if !exists {
 			NewErrorResponse(c, http.StatusForbidden, "user role not found")
 			return

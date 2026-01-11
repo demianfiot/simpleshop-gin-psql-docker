@@ -9,7 +9,7 @@ type Product struct {
 	Price       float64   `json:"price" db:"price" binding:"required"`
 	Stock       int       `json:"stock" db:"stock" binding:"required"`
 	Category    string    `json:"category" db:"category"`
-	SellerID    uint      `json:"seller_id" db:"seller_id"` // +!! 
+	SellerID    uint      `json:"seller_id" db:"seller_id"` // +!!
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
 }
 type CreateProductInput struct {
