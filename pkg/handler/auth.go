@@ -10,7 +10,7 @@ func (h *Handler) SignUp(c *gin.Context) {
 	var input todo.User
 
 	if err := c.BindJSON(&input); err != nil {
-		NewErrorResponse(c, 400, err.Error())
+		NewErrorResponse(c, 400, "invalid input body") // err.Error()
 		return
 	}
 	ctx := c.Request.Context()

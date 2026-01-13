@@ -6,6 +6,8 @@ import (
 	"prac/todo"
 )
 
+//go:generate mockgen -source=service.go -destination=mocks/service_mock.go
+
 type Authorization interface {
 	CreateUser(ctx context.Context, user todo.User) (int, error)
 	GenerateToken(ctx context.Context, email, password string) (string, error)

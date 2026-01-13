@@ -10,6 +10,6 @@ type myerror struct {
 }
 
 func NewErrorResponse(c *gin.Context, statusCode int, massage string) {
-	logrus.Errorf(massage)
+	logrus.Errorf("err : %s", massage)
 	c.AbortWithStatusJSON(statusCode, myerror{Message: massage})
 }
