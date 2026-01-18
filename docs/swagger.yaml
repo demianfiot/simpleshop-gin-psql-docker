@@ -1,0 +1,292 @@
+basePath: /
+definitions:
+  handler.UsersResponse:
+    properties:
+      users:
+        items:
+          $ref: '#/definitions/todo.User'
+        type: array
+    type: object
+  handler.myerror:
+    properties:
+      message:
+        type: string
+    type: object
+  todo.UpdateUserInput:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      role:
+        type: string
+    type: object
+  todo.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        description: customer, seller, admin
+        type: string
+    required:
+    - email
+    - name
+    - password
+    - role
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This API allows creating, retrieving, updating, and deleting users.
+  title: User Service API
+  version: "1.0"
+paths:
+  /api/profile:
+    get:
+      consumes:
+      - application/json
+      description: Get user profile by id form ctx
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/todo.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.myerror'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.myerror'
+      security:
+      - ApiKeyAuth: []
+      summary: Get profile
+      tags:
+      - profile
+    patch:
+      consumes:
+      - application/json
+      description: Update Profile
+      parameters:
+      - description: Updated data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/todo.UpdateUserInput'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/todo.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.myerror'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.myerror'
+      security:
+      - ApiKeyAuth: []
+      summary: Update Profile
+      tags:
+      - profile
+  /api/users:
+    get:
+      description: Get all existing users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.UsersResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.myerror'
+      security:
+      - ApiKeyAuth: []
+      summary: Get users list
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Create a new user in the system
+      parameters:
+      - description: User data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/todo.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.myerror'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.myerror'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new user
+      tags:
+      - users
+  /api/users/{email}:
+    get:
+      consumes:
+      - application/json
+      description: Get user by email
+      parameters:
+      - description: User Emial
+        in: path
+        name: emial
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/todo.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.myerror'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.myerror'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user by email
+      tags:
+      - users
+  /api/users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete user by id
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'message: user deleted successfully'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.myerror'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.myerror'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete user
+      tags:
+      - users
+    get:
+      consumes:
+      - application/json
+      description: Get user by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/todo.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.myerror'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.myerror'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user by ID
+      tags:
+      - users
+    patch:
+      consumes:
+      - application/json
+      description: Update user by id
+      parameters:
+      - description: Updated data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/todo.UpdateUserInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/todo.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.myerror'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.myerror'
+      security:
+      - ApiKeyAuth: []
+      summary: Update user
+      tags:
+      - users
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

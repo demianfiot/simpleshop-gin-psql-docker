@@ -1,11 +1,17 @@
 package handler
 
 import (
+	_ "prac/docs"
 	"prac/pkg/service"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
+
+// gin-swagger middleware
+// swagger embed files
 
 type Handler struct {
 	services service.Service
@@ -17,6 +23,8 @@ func NewHandler(services service.Service) *Handler {
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	//cors -
 	// router.Use(cors.New(cors.Config{
 	// 	AllowOrigins: []string{"http://localhost:3000", "http://127.0.0.1:3000"},
@@ -58,6 +66,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			users.POST("", h.CreateUser)
 			users.GET("", h.GetAllUsers)
 			users.GET("/:id", h.GetUserByID)
+			// users.GET("/:email", h.GetUserByEmail)
 			users.PATCH("/:id", h.UpdateUser)
 			users.DELETE("/:id", h.DeleteUser)
 		}
