@@ -9,6 +9,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// CreateUser godoc
+// @Summary Create a new user
+// @Security ApiKeyAuth
+// @Description Create a new user in the system
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param input body todo.User true "User data"
+// @Success 200 {integer} integer 1
+// @Failure 400 {object} myerror
+// @Failure 500 {object} myerror
+// @Router /api/users  [post]
 func (h *Handler) CreateUser(c *gin.Context) {
 	var input todo.User
 	if err := c.BindJSON(&input); err != nil {
@@ -27,8 +39,16 @@ func (h *Handler) CreateUser(c *gin.Context) {
 	})
 }
 
+// GetAllUsers godoc
+// @Summary Get users list
+// @Security ApiKeyAuth
+// @Description Get all existing users
+// @Tags users
+// @Produce json
+// @Success 200 {object} UsersResponse
+// @Failure 500 {object} myerror
+// @Router /api/users [get]
 func (h *Handler) GetAllUsers(c *gin.Context) {
-
 	ctx := c.Request.Context()
 	users, err := h.services.User.GetAllUsers(ctx)
 	if err != nil {
@@ -36,11 +56,28 @@ func (h *Handler) GetAllUsers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"users": users,
+	c.JSON(http.StatusOK, UsersResponse{
+		Users: users,
 	})
 }
 
+// або без тексту і без дто вийде {array} []User
+type UsersResponse struct {
+	Users []todo.User `json:"users"`
+}
+
+// GetUserByID godoc
+// @Summary Get user by ID
+// @Security ApiKeyAuth
+// @Description Get user by ID
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Success 200 {object} todo.User
+// @Failure 400 {object} myerror
+// @Failure 500 {object} myerror
+// @Router /api/users/{id} [get]
 func (h *Handler) GetUserByID(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -57,6 +94,19 @@ func (h *Handler) GetUserByID(c *gin.Context) {
 		"user": user,
 	})
 }
+
+// GetUserByEmail godoc
+// @Summary Get user by email
+// @Security ApiKeyAuth
+// @Description Get user by email
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param emial path string true "User Emial"
+// @Success 200 {object} todo.User
+// @Failure 400 {object} myerror
+// @Failure 500 {object} myerror
+// @Router /api/users/{email} [get]
 func (h *Handler) GetUserByEmail(c *gin.Context) {
 	email := c.Param("email")
 	ctx := c.Request.Context()
@@ -69,6 +119,19 @@ func (h *Handler) GetUserByEmail(c *gin.Context) {
 		"user": user,
 	})
 }
+
+// UpdateUser godoc
+// @Summary Update user
+// @Security ApiKeyAuth
+// @Description Update user by id
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param input body todo.UpdateUserInput true "Updated data"
+// @Success 200 {object} todo.User
+// @Failure 400 {object} myerror
+// @Failure 500 {object} myerror
+// @Router /api/users/{id} [patch]
 func (h *Handler) UpdateUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -92,6 +155,19 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 		"user": updatedUser,
 	})
 }
+
+// DeleteUser godoc
+// @Summary Delete user
+// @Security ApiKeyAuth
+// @Description Delete user by id
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Success 200 {object} map[string]string "message: user deleted successfully"
+// @Failure 400 {object} myerror
+// @Failure 500 {object} myerror
+// @Router /api/users/{id} [delete]
 func (h *Handler) DeleteUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -107,6 +183,20 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "user deleted successfully"})
 }
 
+//
+
+// GetProfile godoc
+// @Summary Get profile
+// @Security ApiKeyAuth
+// @Description Get user profile by id form ctx
+// @Tags profile
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Success 200 {object} todo.User
+// @Failure 400 {object} myerror
+// @Failure 500 {object} myerror
+// @Router /api/profile [get]
 func (h *Handler) GetProfile(c *gin.Context) {
 	userID, err := h.getUserID(c)
 	if err != nil {
@@ -130,6 +220,18 @@ func (h *Handler) GetProfile(c *gin.Context) {
 		},
 	})
 }
+
+// UpdateProfile godoc
+// @Summary Update Profile
+// @Security ApiKeyAuth
+// @Description Update Profile
+// @Tags profile
+// @Accept json
+// @Param input body todo.UpdateUserInput true "Updated data"
+// @Success 200 {object} todo.User
+// @Failure 400 {object} myerror
+// @Failure 500 {object} myerror
+// @Router /api/profile [patch]
 func (h *Handler) UpdateProfile(c *gin.Context) { // з бівера зробити
 	userID, err := h.getUserID(c)
 	if err != nil {

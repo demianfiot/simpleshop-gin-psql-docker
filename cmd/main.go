@@ -10,9 +10,19 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
-
 	"github.com/spf13/viper"
 )
+
+// @title       User Service API
+// @version     1.0
+// @description This API allows creating, retrieving, updating, and deleting users.
+
+// @host     localhost:8080
+// @BasePath /
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 
 func main() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
