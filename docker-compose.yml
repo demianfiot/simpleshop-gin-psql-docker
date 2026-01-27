@@ -8,23 +8,31 @@ services:
     image: crm-backend:latest
     container_name: crm-backend  
     environment:
-      DB_HOST: ${DB_HOST:-postgres}  
-      DB_PORT: ${DB_PORT:-5432}
-      DB_USER: ${DB_USER:-crm_user}
-      DB_PASSWORD: ${DB_PASSWORD:-crm_password}
-      DB_NAME: ${DB_NAME:-crm_db}
+      DB_HOST: ${DB_HOST}  
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+
       REDIS_URL: redis://redis:6379
-      BACKEND_PORT: ${BACKEND_PORT:-8080} 
-    volumes:
-      - ./configs:/home/appuser/app/configs:ro 
-      - ./.env:/home/appuser/app/.env:ro
+      BACKEND_PORT: ${BACKEND_PORT} 
+      
+      KAFKA_BROKERS: kafka:9092
+
+      CLICKHOUSE_ADDR: clickhouse:9000
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
     ports:
-      - "${BACKEND_PORT:-8080}:${BACKEND_PORT:-8080}"
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
     depends_on:
       postgres:
-        condition: service_healthy  
+        condition: service_healthy
       redis:
-        condition: service_healthy  
+        condition: service_started
+      kafka:
+        condition: service_started
+      clickhouse:
+        condition: service_started
     networks:
       - crm-network
     restart: unless-stopped
@@ -33,16 +41,15 @@ services:
     image: postgres:15-alpine
     container_name: postgres #crm-postgres
     environment:
-      POSTGRES_USER: ${DB_USER:-crm_user}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-crm_password}
-      POSTGRES_DB: ${DB_NAME:-crm_db}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      # - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "${DB_PORT}:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -59,21 +66,60 @@ services:
     volumes:
       - redis_data:/data
     ports:
-      - "${REDIS_PORT:-6379}:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 20s  
+      - "${REDIS_PORT}:6379"
     networks:
       - crm-network
     restart: unless-stopped
 
+  kafka:
+    image: redpandadata/redpanda:v23.3.9
+    container_name: kafka
+    command:
+      - redpanda
+      - start
+      - --smp
+      - "1"
+      - --memory
+      - "1G"
+      - --reserve-memory
+      - "0M"
+      - --overprovisioned
+      - --node-id
+      - "0"
+      - --kafka-addr
+      - PLAINTEXT://0.0.0.0:9092
+      - --advertise-kafka-addr
+      - PLAINTEXT://localhost:9092
+    ports:
+      - "9092:9092"
+    networks:
+      - crm-network
+    restart: unless-stopped
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse
+    environment:
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB}
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    networks:
+      - crm-network
+    restart: unless-stopped
+  
+
 volumes:
   postgres_data:
   redis_data:
+  clickhouse_data:
 
 networks:
   crm-network:
     driver: bridge
+
+

@@ -30,13 +30,17 @@ migrate-create:
 		-v $(PWD)/schema:/schema \
 		migrate/migrate \
 		create -ext sql -dir /schema -seq $${name}
+klickhouse-migrate-up:
+	docker exec -it clickhouse clickhouse-client \
+	--query "$(cat schema/clickhouse/001_create_orders_analytics.sql)"
+
 
 # команди
 up:
 	docker-compose up -d
 
 down:
-	docker-compose down
+	docker-compose down -v 
 
 logs:
 	docker-compose logs -f backend
@@ -47,3 +51,4 @@ db-shell:
 status:
 	docker-compose ps
 	docker-compose exec postgres psql -U $(DB_USER) -d $(DB_NAME) -c "\dt"
+

@@ -3,15 +3,18 @@ package service
 import (
 	"context"
 	"prac/pkg/repository"
+	"prac/pkg/service/events"
 	"prac/todo"
+	"time"
 )
 
 type OrderService struct {
-	repo repository.Order
+	repo     repository.Order
+	producer events.Producer
 }
 
-func NewOrderService(repo repository.Order) *OrderService {
-	return &OrderService{repo: repo}
+func NewOrderService(repo repository.Order, producer events.Producer) *OrderService {
+	return &OrderService{repo: repo, producer: producer}
 }
 func (s *OrderService) CreateOrder(ctx context.Context, userID uint, items []todo.OrderItem) (int, error) {
 	var total float64
@@ -25,7 +28,21 @@ func (s *OrderService) CreateOrder(ctx context.Context, userID uint, items []tod
 		Total:  total,
 	}
 
-	return s.repo.CreateOrder(ctx, order, items)
+	orderID, err := s.repo.CreateOrder(ctx, order, items)
+	if err != nil {
+		return 0, err
+	}
+	event := todo.OrderCreatedEvent{
+		OrderID:   orderID,
+		UserID:    userID,
+		Total:     total,
+		CreatedAt: time.Now(),
+	}
+
+	if err := s.producer.PublishOrderCreated(ctx, event); err != nil {
+		//
+	}
+	return orderID, err
 }
 
 func (s *OrderService) GetUserOrders(ctx context.Context, userID uint) ([]todo.Order, error) {

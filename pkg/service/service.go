@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"prac/pkg/repository"
+	"prac/pkg/service/events"
 	"prac/todo"
 )
 
@@ -46,10 +47,14 @@ type Service struct {
 }
 
 func NewService(repos *repository.Repository) *Service {
+	producer := events.NewKafkaProducer([]string{
+		"localhost:9092", // Adresa Kafka brokera
+	})
+
 	return &Service{
 		Authorization: NewAuthService(repos.Authorization),
 		User:          NewUserService(repos.User, repos.CacheRepository),
 		Product:       NewProductService(repos.Product, repos.CacheRepository),
-		Order:         NewOrderService(repos.Order),
+		Order:         NewOrderService(repos.Order, producer),
 	}
 }
